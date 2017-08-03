@@ -20,8 +20,8 @@ import qualified Data.Text.Lazy as LT
 
 -- Teams --------------------------------------------------------------------
 
-selectTeam :: PrepQuery R (Identity TeamId) (UserId, Text, Text, Maybe Text, Bool, Maybe TeamBinding)
-selectTeam = "select creator, name, icon, icon_key, deleted, binding from team where team = ?"
+selectTeam :: PrepQuery R (Identity TeamId) (UserId, Text, Text, Maybe Text, Maybe TeamStatus, Maybe TeamBinding)
+selectTeam = "select creator, name, icon, icon_key, status, binding from team where team = ?"
 
 selectTeamBinding :: PrepQuery R (Identity TeamId) (Identity (Maybe TeamBinding))
 selectTeamBinding = "select binding from team where team = ?"
@@ -51,7 +51,7 @@ selectUserTeamsFrom :: PrepQuery R (UserId, TeamId) (Identity TeamId)
 selectUserTeamsFrom = "select team from user_team where user = ? and team > ? order by team"
 
 insertTeam :: PrepQuery W (TeamId, UserId, Text, Text, Maybe Text, TeamBinding) ()
-insertTeam = "insert into team (team, creator, name, icon, icon_key, deleted, binding) values (?, ?, ?, ?, ?, false, ?)"
+insertTeam = "insert into team (team, creator, name, icon, icon_key, deleted, status, binding) values (?, ?, ?, ?, ?, false, 0, ?)"
 
 insertTeamConv :: PrepQuery W (TeamId, ConvId, Bool) ()
 insertTeamConv = "insert into team_conv (team, conv, managed) values (?, ?, ?)"
@@ -75,10 +75,10 @@ deleteUserTeam :: PrepQuery W (UserId, TeamId) ()
 deleteUserTeam = "delete from user_team where user = ? and team = ?"
 
 markTeamDeleted :: PrepQuery W (Identity TeamId) ()
-markTeamDeleted = "update team set deleted = true where team = ?"
+markTeamDeleted = "update team set status = 2 where team = ?"
 
 deleteTeam :: PrepQuery W (Identity TeamId) ()
-deleteTeam = "delete from team using timestamp 32503680000000000 where team = ?"
+deleteTeam = "update team using timestamp 32503680000000000 set status = 3 where team = ? "
 
 updateTeamName :: PrepQuery W (Text, TeamId) ()
 updateTeamName = "update team set name = ? where team = ?"

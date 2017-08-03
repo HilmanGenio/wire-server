@@ -118,9 +118,9 @@ team :: MonadClient m => TeamId -> m (Maybe TeamData)
 team tid =
     fmap toTeam <$> retry x1 (query1 Cql.selectTeam (params Quorum (Identity tid)))
   where
-    toTeam (u, n, i, k, d, b) =
+    toTeam (u, n, i, k, s, b) =
         let t = newTeam tid u n i (fromMaybe NonBinding b) & teamIconKey .~ k in
-        TeamData t d
+        TeamData t (fromMaybe Alive s)
 
 teamIdsOf :: MonadClient m => UserId -> Range 1 32 (List TeamId) -> m [TeamId]
 teamIdsOf usr (fromList . fromRange -> tids) =
